@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dse-analytics-lb
+spec:
+  selector: 
+    app: dse-analytics
+  type: NodePort
+  ports:
+  - protocol: TCP 
+    port: 9042
+    name: cql-port
+    nodePort: 32004
+  clusterIP: 10.98.123.154
+  loadBalancerIP: 10.30.1.19
+  type: LoadBalancer   
+status:
+  loadBalancer:
+    ingress:
+    - ip: 146.148.47.155

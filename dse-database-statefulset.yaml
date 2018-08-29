@@ -1,0 +1,88 @@
+---
+apiVersion: "apps/v1beta1"
+kind: StatefulSet
+metadata:
+  name: dse-database
+spec:
+  serviceName: "dse-database"
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: dse-database
+    spec:
+      containers:
+        - name: dse-database
+          image: datastax/dse-server:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 7000
+              name: intra-node
+            - containerPort: 7001
+              name: tls-intra-node
+            - containerPort: 7199
+              name: jmx
+            - containerPort: 8609
+              name: inter-node-msg
+            - containerPort: 9042
+              name: cql-port
+            - containerPort: 9160
+              name: thrift-port
+            - containerPort: 8983
+              name: solr-port
+            - containerPort: 8984
+              name: solr-int-node
+            - containerPort: 4040
+              name: spark-app-port
+            - containerPort: 7077
+              name: spark-int-node
+            - containerPort: 7080
+              name: spark-m-web
+            - containerPort: 7081
+              name: spark-w-web
+            - containerPort: 8090
+              name: spark-job
+            - containerPort: 9999
+              name: spark-job-jmx
+            - containerPort: 18080
+              name: spark-histor
+            - containerPort: 8182
+              name: gremlin-port
+            - containerPort: 5598
+              name: dsefs-public
+            - containerPort: 5599
+              name: dsefs-private
+            - containerPort: 61621
+              name: ds-agent-port
+          env:
+            - name: DS_LICENSE
+              value: accept
+            - name: DSE_SEEDS
+              value: dse-database-0.datastax.default.svc.cluster.local
+            - name: MAX_HEAP_SIZE
+              value: 256M
+            - name: HEAP_NEWSIZE
+              value: 100M
+            - name: DSE_CLUSTER_NAME
+              value: "dse-database"
+            - name: DSE_DC
+              value: "DC1"
+            - name: DSE_RACK
+              value: "Rack1"
+            - name: DSE_ENDPOINT_SNITCH
+              value: GossipingPropertyFileSnitch
+          volumeMounts:
+            - name: dse-database
+              mountPath: /var/lib/datastax/data
+  volumeClaimTemplates:
+    - metadata:
+        name: dse-database
+        annotations:  # comment line if you want to use a StorageClass
+          # or specify which StorageClass
+          volume.beta.kubernetes.io/storage-class: ""   # comment line if you
+          # want to use a StorageClass or specify which StorageClass
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
